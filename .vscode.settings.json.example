@@ -1,0 +1,7 @@
+{
+	"rest-client.environmentVariables": {
+    "local": {
+        "cookie": "next-auth.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..NvNWSUyfGSED8l1g.xFHi3EfFu8QHlUiddsqvKuiPnQlTEv2V4DlKja_NTx1MOFFRYE3JwdhRItNQP8mBMg5CYaG-9BioBCAjrn5AIjRCf_XuektOpRdP0qak7YewOihne0IL-CQhnMYTwxeTKDnj6GtAuLz6E7BVQjVFzbOnlFNkTPKKLX6RiuDJeUfiXS1cLVJpnilIjWGU4yrBq_LTvttdKmq9Z_A-e6xjxHyBuOpf3ZC-zMFKtN1YF15sKit8d47HhYavyDfX_mHZV8aLTQxfu_aRtG4Od9o.LcsCmkYomV9Md9XRTHi5eg; Path=/; HttpOnly;"
+    }
+	}
+}
