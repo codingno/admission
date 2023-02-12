@@ -39,20 +39,38 @@ import axios from 'axios';
 // import FormParent from '../../components/form/FormParent';
 
 function handleError(error) {
+  if(axios.isCancel(error)) 
+		return
 	if(error.response)	
 		alert(error.response.data)
 	else alert(error)
 }
 
+// const field_verification = [
+	// "Certificate of Graduation",
+	// "Certified copies of academic transcripts",
+	// "Motivation Letter",
+	// "Curriculum Vitae",
+	// "IELTS/TOEFL/Pearson Academic Results",
+	// "Proof of Payment",
+	// "Referee recommendation 1",
+	// "Referee recommendation 2",
+// ]
+
+// const documentForUpload = [
 const field_verification = [
-	"Certificate of Graduation",
-	"Certified copies of academic transcripts",
-	"Motivation Letter",
-	"Curriculum Vitae",
-	"IELTS/TOEFL/Pearson Academic Results",
-	"Referee recommendation 1",
-	"Referee recommendation 2",
-	"Proof of Payment",
+	'ID or Passport (2 pages, cover passport and ID page passport)',
+	'Vaccine certificate',
+	'Education certificate',
+	'Certified copies of academic transcripts',
+	'Motivation Letter',
+	'English Certificate',
+	'Arabic Certificate',
+	'Curriculum Vitae',
+	'Self photo',
+	'Research proposal (doctoral program only)',
+	'Publication (doctoral program only)',
+	'Proof of Payment',
 ]
 
 export default function FormVerification() {
@@ -119,12 +137,16 @@ export default function FormVerification() {
 		},[facultySelected])
 
 		useEffect(() => {
+      const controller = new AbortController();
+
 			if(id && facultyOptions.length > 0)
 				getStudentSelected()
 
 			async function getStudentSelected() {
 				try {
-					const { data } = await axios.get('/api/admission?id=' + id)
+					const { data } = await axios.get('/api/admission?id=' + id, {
+               signal: controller.signal
+          })
 					console.log(facultyOptions)
 					const facultySelectedName = data[0]?.proposed_study[0]?.course_title
 					setFacultySelected({ id : facultySelectedName, name : facultySelectedName})
@@ -133,6 +155,9 @@ export default function FormVerification() {
 					handleError(error)	
 				}	
 			}
+
+      return () => controller.abort()
+
 		}, [facultyOptions, id, reload])
 		
 		useEffect(() => {
@@ -143,16 +168,16 @@ export default function FormVerification() {
 
 		useEffect(() => {
 			if(studentSelected?.name) {
-				let prepareDocument = []
-				field_verification.map(item => {
-					const exist = studentSelected.document_upload.filter(x => x.name == item)[0]
-					if(exist)
-						prepareDocument.push(exist)
-				})
-					studentSelected.document_upload.splice(0,studentSelected.document_upload.length)
-					prepareDocument.map(item =>
-							studentSelected.document_upload.splice(studentSelected.document_upload.length, 0, item)
-					)
+				// let prepareDocument = []
+				// field_verification.map(item => {
+				// 	const exist = studentSelected.document_upload.filter(x => x.name == item)[0]
+				// 	if(exist)
+				// 		prepareDocument.push(exist)
+				// })
+				// 	studentSelected.document_upload.splice(0,studentSelected.document_upload.length)
+				// 	prepareDocument.map(item =>
+				// 			studentSelected.document_upload.splice(studentSelected.document_upload.length, 0, item)
+				// 	)
 				setDocumentList(studentSelected.document_upload)
 
 				setRefereeList(studentSelected.referee_detail)
@@ -606,163 +631,11 @@ export default function FormVerification() {
                       </TableHead>
                       <TableBody>
                         {
-												// [
-                        //   "Undergraduate certificate",
-                        //   "Undergraduate academic transcript",
-                        //   "Statement of purpose",
-                        //   "Language Full curriculum vitae in tabular form",
-                        // ]
-												// documentList && documentList
 												documentList.length > 0 && field_verification
+												// documentList.length > 0 && documentList
 												.map((item_field, index) => {
-													if(item_field.includes('Referee recommendation') && refereeList.length > 0) {
-														const item = index == 5 ? refereeList[0] : refereeList[1]
-													if(!item)
-														return (
-														<TableRow
-															sx={{
-																bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
-															}}
-														>
-															<TableCell align="center">{index + 1}</TableCell>
-															<TableCell>
-																<Typography variant="subtitle2" color="initial">{item_field}</Typography>
-															</TableCell>
-															<TableCell align='center'>
-																<Button
-																	color={"error"}
-																>
-																	No
-																</Button>
-															</TableCell>
-															<TableCell></TableCell>
-															<TableCell></TableCell>
-															<TableCell></TableCell>
-														</TableRow>
-														)
-													return (
-                          <TableRow
-                            sx={{
-                              bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
-                            }}
-													>
-                            <TableCell align="center">{index + 1}</TableCell>
-                            <TableCell>
-															<Typography variant="subtitle2" color="initial">{item_field}</Typography>
-														</TableCell>
-                            <TableCell align='center'>
-															<Button
-																// color={index%2 ==0 ? "success" : "error" }
-																color={"success"}
-															>
-															Yes
-															</Button>
-														</TableCell>
-                            <TableCell align="center">
-                              {/* <ControllerTextField
-                                control={control}
-                                name={item.name}
-                                rules={{
-                                  required: "This field is required.",
-                                  validate: (x) => x !== "",
-                                }}
-                                CustomComponent={function (props) {
-                                  return ( */}
-                                    <FormControl component="fieldset">
-                                      {/* <FormLabel component="legend"
-																		sx={{ fontWeight : 700, }} 
-																	>Ability to organize workload</FormLabel> */}
-																				<RadioGroup 
-																				// {...props}
-																					value={item.is_relevance}
-																					onChange={(event, data) => {
-																					let temps = [...refereeList]
-																						// temps[].is_relevance = !!data
-																					temps[index - 5].is_relevance = String(data) == 'true'
-																					temps[index - 5].verifier = session.user.ID
-																					// temps[index].notes = event.target.value
-																					setRefereeList(temps)
-																				}}
-																			>
-                                        <Stack
-                                          direction="row"
-                                          justifyContent="space-between"
-                                          sx={{
-                                            width: "100%",
-                                          }}
-                                        >
-                                          <FormControlLabel
-                                            value={true}
-                                            control={
-                                              <Radio
-                                                disabled={
-																									session?.user.ROLE_ID !== 1
-                                                }
-                                              />
-                                            }
-                                            label="Yes"
-                                          />
-                                          <FormControlLabel
-                                            value={false}
-                                            control={
-                                              <Radio
-                                                disabled={
-                                                  session?.user.ROLE_ID == 3
-                                                }
-                                              />
-                                            }
-                                            label="No"
-                                          />
-                                        </Stack>
-                                      </RadioGroup>
-                                      <FormHelperText></FormHelperText>
-                                    </FormControl>
-                                  {/* );
-                                }}
-                              /> */}
-                            </TableCell>
-														<TableCell>
-                              <TextField
-                                // control={control}
-																value={item.notes}
-																onChange={(event) => {
-																	let temps = [...refereeList]
-																	temps[index - 5].notes = event.target.value
-																	temps[index - 5].verifier = session.user.ID
-																	setRefereeList(temps)
-																}}
-                                name={item.name + ' notes'}
-																label={null}
-																InputLabelProps={{shrink: false}}
-																disabled={
-																	session?.user.ROLE_ID == 3
-																}
-                                // rules={{
-                                //   required: "This field is required.",
-                                //   validate: (x) => x !== "",
-                                // }}
-																/>
-														</TableCell>
-														<TableCell>
-															<a href={
-																`https://${window.location.hostname}/referee/${item.id}`
-															} target="_blank" rel="noopener noreferrer">
-															<Button
-																size="small"
-																variant="contained"
-																color="info"
-																// onClick={() => {
-																	// router.push('/referee/'+item.id)
-																// }}
-															>
-																View
-															</Button>
-															</a>
-														</TableCell>
-                          </TableRow>
-                        )
-													}
 													const item = documentList.filter(x => x.name == item_field)[0]
+													// const item = item_field
 													if(!item)
 														return (
 														<TableRow
@@ -955,6 +828,312 @@ export default function FormVerification() {
                         )
 											}
 												)}
+                        {
+                          refereeList.length > 0 && refereeList.map((item, index) => {
+													// if(item_field.includes('Referee recommendation') && refereeList.length > 0) 
+													// 	const item = refereeList[index] 
+														// const item = index == 5 ? refereeList[0] : refereeList[1]
+													if(!item)
+														return (
+														<TableRow
+															sx={{
+																bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
+															}}
+														>
+															<TableCell align="center">{field_verification.length + index + 1}</TableCell>
+															<TableCell>
+																<Typography variant="subtitle2" color="initial">Referee recommendation {index + 1}</Typography>
+															</TableCell>
+															<TableCell align='center'>
+																<Button
+																	color={"error"}
+																>
+																	No
+																</Button>
+															</TableCell>
+															<TableCell></TableCell>
+															<TableCell></TableCell>
+															<TableCell></TableCell>
+														</TableRow>
+														)
+													return (
+                          <TableRow
+                            sx={{
+                              bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
+                            }}
+													>
+														<TableCell align="center">{field_verification.length + index + 1}</TableCell>
+                            <TableCell>
+															<Typography variant="subtitle2" color="initial">Referee recommendation {index + 1}</Typography>
+														</TableCell>
+                            <TableCell align='center'>
+															<Button
+																// color={index%2 ==0 ? "success" : "error" }
+																color={"success"}
+															>
+															Yes
+															</Button>
+														</TableCell>
+                            <TableCell align="center">
+                              {/* <ControllerTextField
+                                control={control}
+                                name={item.name}
+                                rules={{
+                                  required: "This field is required.",
+                                  validate: (x) => x !== "",
+                                }}
+                                CustomComponent={function (props) {
+                                  return ( */}
+                                    <FormControl component="fieldset">
+                                      {/* <FormLabel component="legend"
+																		sx={{ fontWeight : 700, }} 
+																	>Ability to organize workload</FormLabel> */}
+																				<RadioGroup 
+																				// {...props}
+																					value={item.is_relevance}
+																					onChange={(event, data) => {
+																					let temps = [...refereeList]
+																						// temps[].is_relevance = !!data
+																					temps[index - 5].is_relevance = String(data) == 'true'
+																					temps[index - 5].verifier = session.user.ID
+																					// temps[index].notes = event.target.value
+																					setRefereeList(temps)
+																				}}
+																			>
+                                        <Stack
+                                          direction="row"
+                                          justifyContent="space-between"
+                                          sx={{
+                                            width: "100%",
+                                          }}
+                                        >
+                                          <FormControlLabel
+                                            value={true}
+                                            control={
+                                              <Radio
+                                                disabled={
+																									session?.user.ROLE_ID !== 1
+                                                }
+                                              />
+                                            }
+                                            label="Yes"
+                                          />
+                                          <FormControlLabel
+                                            value={false}
+                                            control={
+                                              <Radio
+                                                disabled={
+                                                  session?.user.ROLE_ID == 3
+                                                }
+                                              />
+                                            }
+                                            label="No"
+                                          />
+                                        </Stack>
+                                      </RadioGroup>
+                                      <FormHelperText></FormHelperText>
+                                    </FormControl>
+                                  {/* );
+                                }}
+                              /> */}
+                            </TableCell>
+														<TableCell>
+                              <TextField
+                                // control={control}
+																value={item.notes}
+																onChange={(event) => {
+																	let temps = [...refereeList]
+																	temps[index - 5].notes = event.target.value
+																	temps[index - 5].verifier = session.user.ID
+																	setRefereeList(temps)
+																}}
+                                name={item.name + ' notes'}
+																label={null}
+																InputLabelProps={{shrink: false}}
+																disabled={
+																	session?.user.ROLE_ID == 3
+																}
+                                // rules={{
+                                //   required: "This field is required.",
+                                //   validate: (x) => x !== "",
+                                // }}
+																/>
+														</TableCell>
+														<TableCell>
+															<a href={
+																`https://${window.location.hostname}/referee/${item.id}`
+															} target="_blank" rel="noopener noreferrer">
+															<Button
+																size="small"
+																variant="contained"
+																color="info"
+																// onClick={() => {
+																	// router.push('/referee/'+item.id)
+																// }}
+															>
+																View
+															</Button>
+															</a>
+														</TableCell>
+                          </TableRow>
+                        )
+                          })
+                        }
+                        {
+                          // refereeList.length > 0 && refereeList.map((item, index) => {
+												documentList.length > 0 && documentList.filter(function (x) { return this.indexOf(x.name) < 0 }, field_verification)[0] &&
+                        documentList.filter(function (x) { return this.indexOf(x.name) < 0 }, field_verification).map((item, index) => {
+
+                        // })
+													// if(item_field.includes('Referee recommendation') && refereeList.length > 0) 
+													// 	const item = refereeList[index] 
+														// const item = index == 5 ? refereeList[0] : refereeList[1]
+													if(!item)
+														return (
+														<TableRow
+															sx={{
+																bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
+															}}
+														>
+															<TableCell align="center">{field_verification.length + index + 1}</TableCell>
+															<TableCell>
+																<Typography variant="subtitle2" color="initial">{item.name}</Typography>
+															</TableCell>
+															<TableCell align='center'>
+																<Button
+																	color={"error"}
+																>
+																	No
+																</Button>
+															</TableCell>
+															<TableCell></TableCell>
+															<TableCell></TableCell>
+															<TableCell></TableCell>
+														</TableRow>
+														)
+													return (
+                          <TableRow
+                            sx={{
+                              bgcolor: index % 2 > 0 ? "#F4F4F4" : "#E9E9E9",
+                            }}
+													>
+														<TableCell align="center">{field_verification.length + index + 1}</TableCell>
+                            <TableCell>
+															<Typography variant="subtitle2" color="initial">{item.name}</Typography>
+														</TableCell>
+                            <TableCell align='center'>
+															<Button
+																// color={index%2 ==0 ? "success" : "error" }
+																color={"success"}
+															>
+															Yes
+															</Button>
+														</TableCell>
+                            <TableCell align="center">
+                              {/* <ControllerTextField
+                                control={control}
+                                name={item.name}
+                                rules={{
+                                  required: "This field is required.",
+                                  validate: (x) => x !== "",
+                                }}
+                                CustomComponent={function (props) {
+                                  return ( */}
+                                    <FormControl component="fieldset">
+                                      {/* <FormLabel component="legend"
+																		sx={{ fontWeight : 700, }} 
+																	>Ability to organize workload</FormLabel> */}
+																				<RadioGroup 
+																				// {...props}
+																					value={item.is_relevance}
+																					onChange={(event, data) => {
+																					let temps = [...refereeList]
+																						// temps[].is_relevance = !!data
+																					temps[index - 5].is_relevance = String(data) == 'true'
+																					temps[index - 5].verifier = session.user.ID
+																					// temps[index].notes = event.target.value
+																					setRefereeList(temps)
+																				}}
+																			>
+                                        <Stack
+                                          direction="row"
+                                          justifyContent="space-between"
+                                          sx={{
+                                            width: "100%",
+                                          }}
+                                        >
+                                          <FormControlLabel
+                                            value={true}
+                                            control={
+                                              <Radio
+                                                disabled={
+																									session?.user.ROLE_ID !== 1
+                                                }
+                                              />
+                                            }
+                                            label="Yes"
+                                          />
+                                          <FormControlLabel
+                                            value={false}
+                                            control={
+                                              <Radio
+                                                disabled={
+                                                  session?.user.ROLE_ID == 3
+                                                }
+                                              />
+                                            }
+                                            label="No"
+                                          />
+                                        </Stack>
+                                      </RadioGroup>
+                                      <FormHelperText></FormHelperText>
+                                    </FormControl>
+                                  {/* );
+                                }}
+                              /> */}
+                            </TableCell>
+														<TableCell>
+                              <TextField
+                                // control={control}
+																value={item.notes}
+																onChange={(event) => {
+																	let temps = [...refereeList]
+																	temps[index - 5].notes = event.target.value
+																	temps[index - 5].verifier = session.user.ID
+																	setRefereeList(temps)
+																}}
+                                name={item.name + ' notes'}
+																label={null}
+																InputLabelProps={{shrink: false}}
+																disabled={
+																	session?.user.ROLE_ID == 3
+																}
+                                // rules={{
+                                //   required: "This field is required.",
+                                //   validate: (x) => x !== "",
+                                // }}
+																/>
+														</TableCell>
+														<TableCell>
+															<a href={
+																`https://${window.location.hostname}/referee/${item.id}`
+															} target="_blank" rel="noopener noreferrer">
+															<Button
+																size="small"
+																variant="contained"
+																color="info"
+																// onClick={() => {
+																	// router.push('/referee/'+item.id)
+																// }}
+															>
+																View
+															</Button>
+															</a>
+														</TableCell>
+                          </TableRow>
+                        )
+                          })
+                        }
                       </TableBody>
                     </Table>
                     {session?.user.ROLE_ID == 1 && documentList.length > 0 && (

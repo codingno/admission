@@ -45,13 +45,15 @@ const states = [
 ]
 
 const documentForUpload = [
-	'ID or Passport',
+	'ID or Passport (2 pages, cover passport and ID page passport)',
+	'Vaccine certificate',
 	'Education certificate',
 	'Certified copies of academic transcripts',
 	'Motivation Letter',
 	'English Certificate',
 	'Arabic Certificate',
 	'Curriculum Vitae',
+	'Self photo',
 	'Research proposal (doctoral program only)',
 	'Publication (doctoral program only)',
 	'Proof of Payment',
@@ -1719,7 +1721,7 @@ export default function FormAdmission() {
 														xs={12}
 														>
 															{
-																documentForUpload.slice(0,5).map(document => (
+																documentForUpload.slice(0,documentForUpload.length / 2).map(document => (
 																<li>
 															<Typography variant="body1" color="initial" mr={5}>{document}</Typography>
 															{
@@ -1744,7 +1746,7 @@ export default function FormAdmission() {
 														xs={12}
 														>
 															{
-																documentForUpload.slice(5).map(document => (
+																documentForUpload.slice(documentForUpload.length / 2).map(document => (
 																<li>
 															<Typography variant="body1" color="initial" mr={5}>{document}</Typography>
 															{
@@ -1781,9 +1783,10 @@ export default function FormAdmission() {
 																))
 															}
 															{
-																otherDocument.length > 0 && session.user.role_id !== 2 &&
+																otherDocument.length > 0 && session.user.role_id == 2 &&
 															<Upload onUploadSuccess={(data) => documentUpload(data, otherDocument, `${otherDocument.toLowerCase()}-` + session.user.ID)} 
 																// attach={item} 
+																attach={{ image_url : dataSaved?.document_upload.filter(function(x) { return this.indexOf(x.name) >= 0 }, documentForUpload)[0]?.url_link}}
 																name={`${otherDocument.toLowerCase()}-` + session.user.ID}
 															/>
 															}

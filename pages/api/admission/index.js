@@ -42,6 +42,10 @@ export default nc({
 			}
 			delete req.query.course_title
 		}
+
+		let is_preadmission = false
+		if ( req.query.is_preadmission )
+			is_preadmission = true	
 		
 		if(session.user.ROLE_ID !== 1 && session.user.ROLE_ID !== 3)
     	return res.status(403).end("You don't have permission to access this list");
@@ -52,9 +56,7 @@ export default nc({
 			options = Object.keys(options).filter(function(x) { return this.indexOf(x) >= 0 }, Object.keys(listColumn)).reduce((a,v) => ({...a, [v] : options[v]}),{})
 		try {
 			console.time("timing")
-			let personal = await db.Personal.findAll({ 
-				where : options,
-				include : [
+			let include = [
 					{
 						model : db.PersonalDetail,
 						as : 'personal_detail',
@@ -97,7 +99,18 @@ export default nc({
 					// "document_upload",
 					// "desk_score",
 					// "interview_score_personal",
-				],
+				]
+			if ( is_preadmission )
+				include.push(
+					{
+						model : db.PreAdmission,
+						as : 'pre_admission',
+						required : true,
+					},
+				)
+			let personal = await db.Personal.findAll({ 
+				where : options,
+				include,
 			})
 			console.timeEnd("timing")
 			// return res.status(200).json(personal)

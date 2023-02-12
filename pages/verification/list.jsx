@@ -80,7 +80,7 @@ export default function AdmissionList() {
               name="student"
               // getUrl="/api/admission?role_id=2&is_verified=1"
 							getUrl={
-								`/api/admission?role_id=2${ submitSelected.id == null ? '&is_verified=null' : '&is_verified=' + submitSelected.id}${ !facultySelected.id ? '' : '&course_title=' + facultySelected.id}`
+								`/api/admission?role_id=2&is_preadmission=1${ submitSelected.id == null ? '&is_verified=null' : '&is_verified=' + submitSelected.id}${ !facultySelected.id ? '' : '&course_title=' + facultySelected.id}`
 							}
 							additionalToolbar={
 								<>

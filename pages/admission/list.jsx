@@ -88,7 +88,7 @@ export default function AdmissionList() {
 									// "/api/admission?role_id=2" :
 									// facultySelected.id ?
 									// "/api/admission?role_id=2&course_title=" + facultySelected.name :
-									`/api/admission?role_id=2${ submitSelected.id == null ? '' : '&submitted=' + submitSelected.id}${ !facultySelected.id ? '' : '&course_title=' + facultySelected.id}`
+									`/api/admission?role_id=2&is_preadmission=1${ submitSelected.id == null ? '' : '&submitted=' + submitSelected.id}${ !facultySelected.id ? '' : '&course_title=' + facultySelected.id}`
 								}
 								additionalToolbar={
 									<>
