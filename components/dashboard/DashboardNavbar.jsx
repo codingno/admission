@@ -58,7 +58,7 @@ export default function DashboardNavbar({ titleTop, onOpenSidebar }) {
 				<Typography color="text.primary" variant="h4" >{titleTop}</Typography>
 				}
         <Stack alignItems="flex-start" spacing={{ xs: 0.5, sm: 1.5, }} mt={2}>
-					<Typography color="#B97B55" variant="h3" m={0}>Universitas Islam Internasional Indonesia</Typography>
+					<Typography color="#B97B55" variant="h3" m={0}>University</Typography>
 					<Typography color="text.primary" variant="body1" fontWeight={700} sx={{ marginTop : '0 !important'}} ><i>Truth and humanity</i></Typography>
         </Stack>
         <Box sx={{ flexGrow: 1 }} />

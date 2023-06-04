@@ -15,6 +15,8 @@ import AuthLogin from '../auth-forms/AuthLogin';
 // assets
 import Image from 'next/image'
 
+import coverLogin from "./cover-login.jpg";
+
 
 // ================================|| AUTH3 - LOGIN ||================================ //
 
@@ -25,7 +27,9 @@ const Login = () => {
 
     return (
         <AuthWrapper1>
-            <Grid container direction="column" justifyContent="flex-end" sx={{ minHeight: '100vh' }} className="auth-bg">
+            <Grid container direction="column" justifyContent="flex-end" sx={{ minHeight: '100vh', 
+                backgroundImage : `url(${coverLogin.src})`,
+                }} className="auth-bg">
                 <Grid item xs={12}>
                     <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: 'calc(100vh - 68px)' }}>
                         <Grid item 
@@ -62,11 +66,11 @@ const Login = () => {
 																>
 																	<Stack alignItems="center" justifyContent="center" spacing={1}>
 																				<div className="login-white-uiii">
-																					<Image src="/blue-uiii.png" alt="login-logo" 
+																					<img src="/homepage-logo.png" alt="login-logo" 
 																							// width={640}
 																							// height={319}
-																							width={350}
-																							height={174.45}
+                                                                                            width={363}
+                                                                                            height={100}
 																							// layout='fill'
 																					/>
 																				</div>

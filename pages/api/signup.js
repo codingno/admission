@@ -140,7 +140,7 @@ After all of your required documents are ready, upload them to the system. Make 
 							Bank Account Number: 1570025252009
 							</p>
 							<p>
-							Bank Account Name: Universitas Islam Internasional Indonesia
+							Bank Account Name: University
 							</p>
 							<p>
 							Bank Name: Bank Mandiri
