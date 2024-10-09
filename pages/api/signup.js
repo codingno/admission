@@ -1,16 +1,18 @@
 import nc from "next-connect";
-import db from '../../db/models'
+import db from "../../db/models";
 let nodemailer = require("nodemailer");
-  // create reusable transporter object using the default SMTP transport
-  let transporter = nodemailer.createTransport({
-    host: "smtp-relay.sendinblue.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER, // generated ethereal user
-      pass: process.env.SMTP_PASS, // generated ethereal password
-    },
-  });
+// create reusable transporter object using the default SMTP transport
+let transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER, // generated ethereal user
+    pass: process.env.SMTP_PASS, // generated ethereal password
+  },
+  logger: true,
+  debug: true,
+});
 
 // import db from "../../../db/models";
 // import police from "../../../config/police";
@@ -26,77 +28,79 @@ export default nc({
 })
   // .use(police[role])
   .post(async (req, res) => {
-		try {
-			console.log(JSON.stringify(req.body, null, 4))
-			const { name, email, password } = req.body
-			// const personal = await db.Personal.findAll({ 
-			// 	include : [
-			// 		{
-			// 			model : db.PersonalSecret,
-			// 			as : 'personal_secret',
-			// 		},
-			// 		{
-			// 			model : db.PersonalDetail,
-			// 			as : 'personal_detail',
-			// 		},
-			// 	]
-			// })
-			const isPersonalExist = await db.Personal.findOne({
-				where : {
-					email,
-				},
-			})
-			if(isPersonalExist)
-				return res.status(400).send("Email already registered.")
-			const personal = await db.Personal.create({
-				name,
-				email,
-			})
-			const personal_secret = await db.PersonalSecret.create({
-				personal_id: personal.id,
-				username : name,
-				password,
-			})
-			// const personal_secret = await db.PersonalSecret.findAll({
-			// 	include : [
-			// 		{
-			// 			model : db.Personal,
-			// 			as : 'personal',
-			// 		},
-			// 	]
-			// })
-			// return res.send("ok")
-			// const personal_details = await db.PersonalDetail.findAll({
-			// 	include : [
-			// 		{
-			// 			model : db.Personal,
-			// 			as : 'personal',
-			// 		},
-			// 	]
-			// })
-			// return res.send("ok")
-			
-			const email_token = personal_secret.email_token || personal_secret.dataValues.email_token
-			// const email_token_url = `${'http://' + req.headers.host }/api/mail/verify/${email_token}`
-			const email_token_url = `https://${process.env.EMAIL_TOKEN_URL}/api/mail/verify/${email_token}`
-			let info = await transporter.sendMail({
-				from: `"Admission UIII" <` + process.env.SMTP_EMAIL_FROM + '>', // sender address
-				// from: 'Codingno <codingno@gmail.com>', // sender address
-				// to: "bar@example.com, baz@example.com", // list of receivers
-				// to: "codingno@gmail.com", // list of receivers
-				to: personal.email, // list of receivers
-				// subject: "Admission UIII Account Registration", // Subject line
-				// subject: "Account Registration for UIII Admissions 2022-2023", // Subject line
-				subject: "Account Registration for UIII Admissions 2023-2024", // Subject line
-				// text: "Hello world?", // plain text body
-				// html: "<b>Hello world?</b>", // html body
-				// html : `
-				// 	<p>Please verification your email with link below.</p>
-				// 	<a href = "${email_token_url}" >verify email</a>
-					// <p>Thank you for registering your online account for the UIII Admissions 2022-2023.</p>
-				// `
-				html : `
-					<p>Thank you for registering your online account for the UIII Admissions 2023-2024.</p>
+    try {
+      console.log(JSON.stringify(req.body, null, 4));
+      const { name, email, password } = req.body;
+      // const personal = await db.Personal.findAll({
+      // 	include : [
+      // 		{
+      // 			model : db.PersonalSecret,
+      // 			as : 'personal_secret',
+      // 		},
+      // 		{
+      // 			model : db.PersonalDetail,
+      // 			as : 'personal_detail',
+      // 		},
+      // 	]
+      // })
+      const isPersonalExist = await db.Personal.findOne({
+        where: {
+          email,
+        },
+      });
+      if (isPersonalExist)
+        return res.status(400).send("Email already registered.");
+      const personal = await db.Personal.create({
+        name,
+        email,
+        role_id: 2,
+      });
+      const personal_secret = await db.PersonalSecret.create({
+        personal_id: personal.id,
+        username: name,
+        password,
+      });
+      // const personal_secret = await db.PersonalSecret.findAll({
+      // 	include : [
+      // 		{
+      // 			model : db.Personal,
+      // 			as : 'personal',
+      // 		},
+      // 	]
+      // })
+      // return res.send("ok")
+      // const personal_details = await db.PersonalDetail.findAll({
+      // 	include : [
+      // 		{
+      // 			model : db.Personal,
+      // 			as : 'personal',
+      // 		},
+      // 	]
+      // })
+      // return res.send("ok")
+
+      const email_token =
+        personal_secret.email_token || personal_secret.dataValues.email_token;
+      // const email_token_url = `${'http://' + req.headers.host }/api/mail/verify/${email_token}`
+      const email_token_url = `https://${process.env.EMAIL_TOKEN_URL}/api/mail/verify/${email_token}`;
+      console.log("before transporter");
+      if (process.env.SKIP_EMAIL === "true")
+        return res.status(200).end("Sign Up success.");
+      let info = await transporter.sendMail({
+        from: `"Admission ${process.env.UNIVERSITY_NAME}" <${process.env.SMTP_EMAIL_FROM}>`, // sender address
+        // from: 'Codingno <codingno@gmail.com>', // sender address
+        // to: "bar@example.com, baz@example.com", // list of receivers
+        // to: "codingno@gmail.com", // list of receivers
+        to: personal.email, // list of receivers
+        subject: `Account Registration for ${process.env.UNIVERSITY_NAME} Admissions ${process.env.ADMISSION_YEAR}`, // Subject line
+        // text: "Hello world?", // plain text body
+        // html: "<b>Hello world?</b>", // html body
+        // html : `
+        // 	<p>Please verification your email with link below.</p>
+        // 	<a href = "${email_token_url}" >verify email</a>
+        // `
+        html: `
+					<p>Thank you for registering your online account for the ${process.env.UNIVERSITY_NAME} Admissions ${process.env.ADMISSION_YEAR}.</p>
 					<p></p>
 					<p></p>
 					<p>Please pay attention to the following points:</p>
@@ -137,7 +141,7 @@ After all of your required documents are ready, upload them to the system. Make 
 							Transfer the fee to:
 							</p>
 							<p>
-							Bank Account Number: 1570025252009
+							Bank Account Number: 1234567890987
 							</p>
 							<p>
 							Bank Account Name: University
@@ -149,7 +153,7 @@ After all of your required documents are ready, upload them to the system. Make 
 							Swift Code: BMRIIDJA
 							</p>
 							<p style="color: red;">
-							Before you make the payment, please add <span style="font-weight: 700;">"UIII APPLICATION FEE"</span> in the description of the money transfer
+							Before you make the payment, please add <span style="font-weight: 700;">"${process.env.UNIVERSITY_NAME} APPLICATION FEE"</span> in the description of the money transfer
 							</p>
 							</li>
 							<li>
@@ -178,15 +182,15 @@ After all of your required documents are ready, upload them to the system. Make 
 					<p>Best regards,</p>
 					<p>Admission Committee</p>
 					<p>
-					<a href = "https://uiii.ac.id/admissions" >https://uiii.ac.id/admissions</a>
+					<a href = "https:/${process.env.UNIVERSITY_SITE}/admissions" >https://${process.env.UNIVERSITY_SITE}/admissions</a>
 					</p>
 					<p>This is an automated message. Please do not reply to this email.</p>
-				`
-			});
+				`,
+      });
 
-			console.log("Message sent: %s", info.messageId);
-			res.status(200).end("Sign Up success, please verify your email.")
-		} catch (error) {
-			
-		}
-	})
+      console.log("Message sent: %s", info.messageId);
+      res.status(200).end("Sign Up success, please verify your email.");
+    } catch (error) {
+      console.log("error signup : ", JSON.stringify(error, null, 2));
+    }
+  });
